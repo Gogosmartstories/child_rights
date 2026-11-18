@@ -135,12 +135,6 @@
         </div>
       </div>
 
-      <label class="f" for="title">اسم التصميم / الشعار</label>
-      <input type="text" id="title" placeholder="مثال: معًا من أجل الطفولة">
-
-      <label class="f" for="idea">فكرة التصميم ومعاني عناصره</label>
-      <textarea id="idea" maxlength="450" placeholder="اشرحي باختصار ما ترمز إليه الألوان والأشكال في شعارك…"></textarea>
-      <div style="text-align:left;color:var(--muted);font-size:12.5px;margin-top:4px"><span id="count">0</span> / 450</div>
     </section>
 
     <!-- إرفاق التصميم -->
@@ -195,7 +189,7 @@
 <script>
 (() => {
   // ======= ضعي هنا رابط تطبيق الويب من Google Apps Script (ينتهي بـ /exec) =======
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxe3pmh86-RTlDviC-M666mQiJxgI6GhlFMcxDvYDIhxWgJpV3jbXbcvFquMaCrmfwY/exec";
+  const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
   // ================================================================================
   const MAX_MB = 10;
   const $ = id => document.getElementById(id);
@@ -240,9 +234,8 @@
     drop.classList.remove("has"); $("filebar").classList.remove("show"); draw();
   });
 
-  ["name","school","section","title","idea","grade","pledge"].forEach(id =>
+  ["name","school","section","grade","pledge"].forEach(id =>
     $(id).addEventListener(id==="grade"||id==="pledge" ? "change" : "input", () => {
-      if (id==="idea") $("count").textContent = $("idea").value.length;
       draw();
     }));
 
@@ -270,8 +263,7 @@
   function draw(){
     const v = {
       name: $("name").value.trim(), school: $("school").value.trim(), stage: stage(), grade: $("grade").value,
-      section: $("section").value.trim(), title: $("title").value.trim(),
-      idea: $("idea").value.trim(), pledge: $("pledge").checked
+      section: $("section").value.trim(), pledge: $("pledge").checked
     };
     ctx.setTransform(1,0,0,1,0,0);
     ctx.fillStyle = "#fff"; ctx.fillRect(0,0,W,H);
@@ -298,8 +290,7 @@
     const rows = [
       ["اسم الطالبة", v.name],
       ["اسم المدرسة", v.school],
-      ["الصف / الشعبة", v.grade + (v.section ? "  /  " + v.section : "")],
-      ["اسم التصميم", v.title]
+      ["الصف / الشعبة", v.grade + (v.section ? "  /  " + v.section : "")]
     ];
     const lblW = 250, rowH = 72, boxL = M, boxW = W - 2*M;
     rr(boxL, y, boxW, rowH*rows.length, 18); ctx.fillStyle = C.rose2; ctx.fill();
@@ -318,7 +309,7 @@
     y += rowH*rows.length + 50;
     text("التصميم المشارك", W-M, y, F(800,32), C.maroon);
     y += 22;
-    const dH = 640;
+    const dH = (H - 110 - 140) - 70 - y; // fill space down to pledge/signature above footer
     rr(M, y, boxW, dH, 22); ctx.fillStyle = "#fff"; ctx.fill();
     ctx.lineWidth = 3; ctx.strokeStyle = C.maroon; ctx.stroke();
     if (imgEl){
@@ -332,20 +323,9 @@
       text("يُرفق التصميم هنا", W/2, y+dH/2, F(700,36), "#c29aa9", "center");
     }
 
-    // idea
-    y += dH + 60;
-    text("فكرة التصميم", W-M, y, F(800,32), C.maroon);
-    y += 18;
-    const ideaFont = F(500,26);
-    let lines = v.idea ? wrap(v.idea, boxW-56, ideaFont) : [];
-    if (lines.length > 5){ lines = lines.slice(0,5); lines[4] = lines[4].replace(/\s*\S*$/, "") + " …"; }
-    const ideaH = 200;
-    rr(M, y, boxW, ideaH, 18); ctx.fillStyle = C.rose2; ctx.fill(); ctx.strokeStyle = C.line; ctx.lineWidth = 2; ctx.stroke();
-    if (lines.length) lines.forEach((l,i) => text(l, W-M-28, y+48+i*36, ideaFont, C.ink));
-    else for (let i=0;i<4;i++){ ctx.setLineDash([6,8]); ctx.beginPath(); ctx.moveTo(W-M-28, y+56+i*40); ctx.lineTo(M+28, y+56+i*40); ctx.strokeStyle="#cdb3bd"; ctx.lineWidth=2; ctx.stroke(); ctx.setLineDash([]); }
+    y += dH + 70;
 
     // pledge + signature
-    y += ideaH + 52;
     const bx = W-M-30;
     rr(bx, y-26, 30, 30, 6); ctx.strokeStyle = C.maroon; ctx.lineWidth = 3; ctx.stroke();
     if (v.pledge){ ctx.beginPath(); ctx.moveTo(bx+6, y-11); ctx.lineTo(bx+13, y-3); ctx.lineTo(bx+25, y-19); ctx.strokeStyle = C.maroon; ctx.lineWidth = 4; ctx.stroke(); }
@@ -394,7 +374,6 @@
     try {
       const payload = {
         name: $("name").value.trim(), school: $("school").value.trim(), grade: $("grade").value, section: $("section").value.trim(),
-        title: $("title").value.trim(), idea: $("idea").value.trim(),
         designName: designFile.name, designType: designFile.type || "image/png",
         designData: await readB64(designFile),
         formData: cv.toDataURL("image/png").split(",")[1]
@@ -432,8 +411,8 @@
   });
 
   $("reset").addEventListener("click", () => {
-    ["name","school","section","title","idea"].forEach(id => $(id).value = "");
-    $("pledge").checked = false; $("count").textContent = "0";
+    ["name","school","section"].forEach(id => $(id).value = "");
+    $("pledge").checked = false;
     $("clear").click(); sentOnce = false; say("", "");
     window.scrollTo({top:0, behavior:"smooth"});
   });
