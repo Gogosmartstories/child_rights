@@ -120,6 +120,9 @@
       <label class="f" for="name">اسم الطالبة الثلاثي <span class="req">*</span></label>
       <input type="text" id="name" autocomplete="name" placeholder="مثال: نورة محمد الكواري">
 
+      <label class="f" for="school">اسم المدرسة <span class="req">*</span></label>
+      <input type="text" id="school" autocomplete="organization" placeholder="مثال: مدرسة هند بنت عُتبة الإعدادية للبنات">
+
 
       <div class="row2">
         <div>
@@ -192,7 +195,7 @@
 <script>
 (() => {
   // ======= ضعي هنا رابط تطبيق الويب من Google Apps Script (ينتهي بـ /exec) =======
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxe3pmh86-RTlDviC-M666mQiJxgI6GhlFMcxDvYDIhxWgJpV3jbXbcvFquMaCrmfwY/exec";
+  const SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
   // ================================================================================
   const MAX_MB = 10;
   const $ = id => document.getElementById(id);
@@ -237,7 +240,7 @@
     drop.classList.remove("has"); $("filebar").classList.remove("show"); draw();
   });
 
-  ["name","section","title","idea","grade","pledge"].forEach(id =>
+  ["name","school","section","title","idea","grade","pledge"].forEach(id =>
     $(id).addEventListener(id==="grade"||id==="pledge" ? "change" : "input", () => {
       if (id==="idea") $("count").textContent = $("idea").value.length;
       draw();
@@ -266,7 +269,7 @@
 
   function draw(){
     const v = {
-      name: $("name").value.trim(), stage: stage(), grade: $("grade").value,
+      name: $("name").value.trim(), school: $("school").value.trim(), stage: stage(), grade: $("grade").value,
       section: $("section").value.trim(), title: $("title").value.trim(),
       idea: $("idea").value.trim(), pledge: $("pledge").checked
     };
@@ -294,6 +297,7 @@
     let y = 380;
     const rows = [
       ["اسم الطالبة", v.name],
+      ["اسم المدرسة", v.school],
       ["الصف / الشعبة", v.grade + (v.section ? "  /  " + v.section : "")],
       ["اسم التصميم", v.title]
     ];
@@ -314,7 +318,7 @@
     y += rowH*rows.length + 50;
     text("التصميم المشارك", W-M, y, F(800,32), C.maroon);
     y += 22;
-    const dH = 712;
+    const dH = 640;
     rr(M, y, boxW, dH, 22); ctx.fillStyle = "#fff"; ctx.fill();
     ctx.lineWidth = 3; ctx.strokeStyle = C.maroon; ctx.stroke();
     if (imgEl){
@@ -364,6 +368,7 @@
   function validate(){
     const miss = [];
     if (!$("name").value.trim()) miss.push("اسم الطالبة");
+    if (!$("school").value.trim()) miss.push("اسم المدرسة");
     if (!imgEl) miss.push("ملف التصميم");
     if (!$("pledge").checked) miss.push("الإقرار");
     if (miss.length){ say("يُرجى إكمال: " + miss.join("، "), "err"); return false; }
@@ -388,7 +393,7 @@
     say("جارٍ رفع التصميم، لا تغلقي الصفحة…", "");
     try {
       const payload = {
-        name: $("name").value.trim(), grade: $("grade").value, section: $("section").value.trim(),
+        name: $("name").value.trim(), school: $("school").value.trim(), grade: $("grade").value, section: $("section").value.trim(),
         title: $("title").value.trim(), idea: $("idea").value.trim(),
         designName: designFile.name, designType: designFile.type || "image/png",
         designData: await readB64(designFile),
@@ -427,7 +432,7 @@
   });
 
   $("reset").addEventListener("click", () => {
-    ["name","section","title","idea"].forEach(id => $(id).value = "");
+    ["name","school","section","title","idea"].forEach(id => $(id).value = "");
     $("pledge").checked = false; $("count").textContent = "0";
     $("clear").click(); sentOnce = false; say("", "");
     window.scrollTo({top:0, behavior:"smooth"});
